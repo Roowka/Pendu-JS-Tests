@@ -1,12 +1,9 @@
 const malusScore = 50;
 
-// Get the number of tries from the local storage
+// LOCAL STORAGE
 let numberOfTries = localStorage.getItem("numberOfTries") || 5;
-
-// Get the date from the local storage
 let date = localStorage.getItem("date") || new Date().toISOString;
 
-// test if the date was one day ago, if then the number of tries is reset to 5
 if (new Date(date).getTime() + 24 * 60 * 60 * 1000 < new Date().getTime()) {
   numberOfTries = 5;
   localStorage.setItem("numberOfTries", numberOfTries);
@@ -18,7 +15,22 @@ document.getElementById("nbLeftTries").innerHTML =
 
 let score = localStorage.getItem("score") || 1000;
 
-// Add event listener to the submit button
+// SCORES
+fetch("/api/scores")
+  .then((response) => response.json())
+  .then((data) => {
+    console.log("scores from api", data);
+    for (let i = 0; i < data.length; i++) {
+      let player = data[i];
+      let username = player["Username"];
+      let score = player["Score"];
+      let playerElement = document.createElement("li");
+      playerElement.innerHTML = username + " : " + score;
+      document.getElementById("scoresList").appendChild(playerElement);
+    }
+  });
+
+// EVENTS
 document.getElementById("submitGuess").addEventListener("click", submitGuess);
 let unknowWord = "";
 fetch("/api/word")
@@ -31,7 +43,10 @@ fetch("/api/word")
       "Votre mot est : " + unknowWord;
   });
 
-// Create a cooldown of 1000 seconds that i'll show on the page on the page, the cooldown will be decremented every second
+document
+  .getElementById("submitUsername")
+  .addEventListener("click", submitUsername);
+
 document.getElementById("cooldown").innerHTML =
   "Il te reste : " + score + " secondes";
 const cooldownInterval = setInterval(() => {
@@ -82,20 +97,20 @@ function changeUI(data) {
     "Votre mot est : " + data.guess.unknowWord;
   document.getElementById("letterInput").value = "";
 
-  // test if the unknowWord is equal to the word
   console.log("unknowWord", data.guess.unknowWord);
   console.log("word", data.guess.word);
   if (data.guess.unknowWord === data.guess.word) {
     clearInterval(cooldownInterval);
     document.getElementById("nbLeftTries").innerHTML = "Et c'est gagné 🥳";
     document.getElementById("nbLeftTries").classList.add("text-green-500");
-    document.getElementById("cooldown").innerHTML =
-      "Ton score est de : " + score;
     document.getElementById("cooldown").classList.remove("text-red-500");
+
+    // HIDDEN
     document.getElementById("gameDescription").classList.add("hidden");
     document.getElementById("letterInput").classList.add("hidden");
     document.getElementById("submitGuess").classList.add("hidden");
     document.getElementById("gameEnd").classList.remove("hidden");
+    document.getElementById("usernameModal").classList.remove("hidden");
   }
 }
 
@@ -106,9 +121,27 @@ function updateTries() {
     "Nombre de tentatives restantes : " + numberOfTries;
   if (numberOfTries <= 0) {
     clearInterval(cooldownInterval);
-    document.getElementById("cooldown").innerHTML = "Perdu nullos 🫵😂 !";
+    document.getElementById("cooldown").innerHTML = "Perdu nullos 🫵😂";
 
     document.getElementById("letterInput").disabled = true;
     document.getElementById("submitGuess").disabled = true;
   }
+}
+
+async function submitUsername(event) {
+  event.preventDefault();
+  let username = document.getElementById("usernameInput").value;
+  document.getElementById("cooldown").innerHTML =
+    username + ", ton score est de : " + score;
+  console.log("username", username);
+  document.getElementById("usernameModal").classList.add("hidden");
+  const res = await fetch("/api/scores", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ username: username, score: score }),
+  });
+  const data = await res.json();
+  window.location.reload();
 }

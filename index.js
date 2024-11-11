@@ -2,6 +2,7 @@ require("dotenv").config();
 const express = require("express");
 const path = require("path");
 const Game = require("./game.js");
+const Sqlite = require("./sqlite.js");
 
 const PORT = process.env.PORT || 3030;
 
@@ -46,8 +47,13 @@ app.get("/api/word", (request, response) => {
 
 app.get("/api/scores", (request, response) => {
   try {
-    let scores = game.scores;
-    response.json({ scores: scores });
+    let scores = Sqlite.getPlayers()
+      .then((players) => {
+        response.json(players);
+      })
+      .catch((err) => {
+        console.error("Failed to get players:", err);
+      });
   } catch (error) {
     console.error(error.message);
     response.status(500).send("An error occurred: " + error.message);
@@ -56,7 +62,16 @@ app.get("/api/scores", (request, response) => {
 
 app.post("/api/scores", (request, response) => {
   try {
-    response.json({ scores: scores });
+    console.log(request.body);
+    const username = request.body.username;
+    const score = request.body.score;
+    const date = new Date().toISOString();
+
+    Sqlite.insertPlayer(username, score, date);
+
+    response
+      .status(201)
+      .json({ success: true, player: { username, score, date } });
   } catch (error) {
     console.error(error.message);
     response.status(500).send("An error occurred: " + error.message);
