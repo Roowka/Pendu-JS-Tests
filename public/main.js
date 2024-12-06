@@ -170,19 +170,21 @@ function setDefeatUI() {
 
 function setAlreadyPlayedUI(win) {
   if (win) {
-    document.getElementById("gameDescription").innerHTML = "Reviens demain !";
-    document.getElementById("nbLeftTries").innerHTML =
+    document.getElementById("commeBackTomorrow").innerHTML = "Reviens demain !";
+    document.getElementById("alreadyPlayed").innerHTML =
       "T'as déjà gagné aujourd'hui 🥳";
-    document.getElementById("nbLeftTries").classList.add("text-green-500");
+    document.getElementById("alreadyPlayed").classList.add("text-green-500");
   } else {
-    document.getElementById("gameDescription").innerHTML =
+    document.getElementById("commeBackTomorrow").innerHTML =
       "T'auras peut-être plus de chance demain !";
-    document.getElementById("nbLeftTries").innerHTML =
+    document.getElementById("alreadyPlayed").innerHTML =
       "T'as déjà perdu aujourd'hui 🫵😂";
-    document.getElementById("nbLeftTries").classList.add("text-red-500");
+    document.getElementById("alreadyPlayed").classList.add("text-red-500");
   }
   document.getElementById("letterInput").classList.add("hidden");
   document.getElementById("submitGuess").classList.add("hidden");
   document.getElementById("userWord").classList.add("hidden");
   document.getElementById("cooldown").classList.add("hidden");
+  document.getElementById("gameDescription").classList.add("hidden");
+  document.getElementById("nbLeftTries").classList.add("hidden");
 }
