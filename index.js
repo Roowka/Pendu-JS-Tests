@@ -10,6 +10,8 @@ const app = express();
 
 const game = new Game();
 
+Sqlite.connect();
+
 // Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -80,7 +82,7 @@ app.post("/api/scores", (request, response) => {
 
 (async () => {
   try {
-    await game.loadWords();
+    await game.loadWords("words_fr.txt");
     app.listen(PORT, () =>
       console.log(`Listening on http://localhost:${PORT}`)
     );

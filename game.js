@@ -8,9 +8,9 @@ class Game {
     this.scores = [];
   }
 
-  loadWords() {
+  loadWords(filename) {
     return new Promise((resolve, reject) => {
-      fs.createReadStream("words_fr.txt")
+      fs.createReadStream(filename)
         .pipe(csv())
         .on("data", (row) => {
           this.listOfWords.push(row.word.toLowerCase());
