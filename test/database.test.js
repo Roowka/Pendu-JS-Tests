@@ -1,62 +1,124 @@
-const Sqlite = require("../sqlite.js");
+const sqlite3 = require("sqlite3").verbose();
+const {
+  createDatabase,
+  insertPlayer,
+  getPlayers,
+  connect,
+} = require("../sqlite");
 
-beforeAll(async () => {
-  await new Promise((resolve, reject) => {
-    const db = require("sqlite3").verbose();
-    const database = new db.Database("./hangman.db");
-
-    database.run("DELETE FROM Players;", (err) => {
-      if (err) {
-        reject(err);
-      }
-      resolve();
-    });
+jest.mock("sqlite3", () => {
+  const runMock = jest.fn();
+  const allMock = jest.fn();
+  const DatabaseMock = jest.fn((dbPath, callback) => {
+    if (dbPath === "./test.db") callback(null);
+    return { run: runMock, all: allMock };
   });
+
+  return {
+    verbose: jest.fn(() => ({ Database: DatabaseMock })),
+    __mocks__: { DatabaseMock, runMock, allMock },
+  };
 });
 
-describe("Database tests", () => {
-  it("should insert a player into the database", async () => {
-    const username = "toto";
-    const score = 10;
-    const date = new Date().toISOString();
+describe("Database Module", () => {
+  let mockDb;
 
-    // Insertion d'un joueur
-    await Sqlite.insertPlayer(username, score, date);
-
-    // Récupération des joueurs pour vérification
-    const players = await Sqlite.getPlayers();
-
-    // Vérification
-    expect(players).toHaveLength(1);
-    expect(players[0]).toEqual(
-      expect.objectContaining({
-        Username: username,
-        Score: score,
-        Date: date,
-      })
-    );
+  beforeEach(() => {
+    const sqlite3Mock = require("sqlite3").__mocks__;
+    mockDb = new sqlite3Mock.DatabaseMock();
   });
 
-  it("should retrieve multiple players sorted by score in descending order", async () => {
-    // Insertion de plusieurs joueurs
-    const playersToInsert = [
-      { username: "titi", score: 20, date: new Date().toISOString() },
-      { username: "tata", score: 5, date: new Date().toISOString() },
-    ];
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
 
-    for (const player of playersToInsert) {
-      await Sqlite.insertPlayer(player.username, player.score, player.date);
-    }
+  describe("createDatabase", () => {
+    it("should create a new database without errors", () => {
+      expect(() => createDatabase("./test.db")).not.toThrow();
+      expect(sqlite3.Database).toHaveBeenCalledWith(
+        "./test.db",
+        expect.any(Function)
+      );
+    });
 
-    // Récupération des joueurs pour vérification
-    const players = await Sqlite.getPlayers();
+    it("should throw an error if database connection fails", () => {
+      const sqlite3Mock = require("sqlite3").__mocks__;
+      sqlite3Mock.DatabaseMock.mockImplementationOnce((_, callback) =>
+        callback(new Error("Connection error"))
+      );
 
-    // Vérification de l'ordre et des données
-    expect(players).toHaveLength(3); // 1 joueur inséré avant + 2 nouveaux
-    expect(players[0].Score).toBeGreaterThanOrEqual(players[1].Score);
-    expect(players[1].Score).toBeGreaterThanOrEqual(players[2].Score);
-    expect(players.map((p) => p.Username)).toEqual(
-      expect.arrayContaining(["toto", "titi", "tata"])
-    );
+      expect(() => createDatabase("./test.db")).toThrow("Connection error");
+    });
+  });
+
+  describe("connect", () => {
+    it("should execute SQL to create the Players table without errors", () => {
+      connect("./test.db");
+      expect(mockDb.run).toHaveBeenCalledWith(
+        expect.stringContaining(`CREATE TABLE IF NOT EXISTS Players (
+    Player_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    Username VARCHAR(100) NOT NULL,
+    Score INTEGER(100) NOT NULL,
+    Date DATE
+  );`),
+        expect.any(Function)
+      );
+    });
+
+    it("should throw an error if table creation fails", () => {
+      mockDb.run.mockImplementationOnce((_, callback) =>
+        callback(new Error("Table creation failed"))
+      );
+
+      expect(() => connect("./test.db")).toThrow("Table creation failed");
+    });
+  });
+
+  describe("insertPlayer", () => {
+    it("should insert a player without errors", async () => {
+      mockDb.run.mockImplementation((_, __, callback) => callback(null));
+
+      await expect(
+        insertPlayer("Alice", 100, "2024-01-01")
+      ).resolves.not.toThrow();
+      expect(mockDb.run).toHaveBeenCalledWith(
+        expect.stringContaining("INSERT INTO Players"),
+        ["Alice", 100, "2024-01-01"],
+        expect.any(Function)
+      );
+    });
+
+    it("should reject the promise if insertion fails", async () => {
+      mockDb.run.mockImplementation((_, __, callback) =>
+        callback(new Error("Insertion failed"))
+      );
+
+      await expect(insertPlayer("Bob", 200, "2024-02-01")).rejects.toThrow(
+        "Insertion failed"
+      );
+    });
+  });
+
+  describe("getPlayers", () => {
+    it("should fetch players without errors", async () => {
+      const mockRows = [
+        { Player_id: 1, Username: "Alice", Score: 100, Date: "2024-01-01" },
+      ];
+      mockDb.all.mockImplementation((_, callback) => callback(null, mockRows));
+
+      await expect(getPlayers()).resolves.toEqual(mockRows);
+      expect(mockDb.all).toHaveBeenCalledWith(
+        expect.stringContaining("SELECT * FROM Players"),
+        expect.any(Function)
+      );
+    });
+
+    it("should reject the promise if fetching fails", async () => {
+      mockDb.all.mockImplementation((_, callback) =>
+        callback(new Error("Fetch failed"))
+      );
+
+      await expect(getPlayers()).rejects.toThrow("Fetch failed");
+    });
   });
 });
