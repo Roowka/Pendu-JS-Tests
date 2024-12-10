@@ -6,6 +6,7 @@ class Game {
   constructor() {
     this.listOfWords = [];
     this.scores = [];
+    this.numberOfTries = 5;
   }
 
   loadWords(filename) {
@@ -44,14 +45,21 @@ class Game {
     }
 
     if (this.word.includes(oneLetter)) {
+      let updatedUnknowWord = unknowWord;
+      console.log("updatedUnknowWorddddd", updatedUnknowWord);
+
       for (let i = 0; i < this.word.length; i++) {
         if (this.word[i] === oneLetter) {
-          unknowWord = tools.replaceAt(unknowWord, i, oneLetter);
+          updatedUnknowWord = tools.replaceAt(updatedUnknowWord, i, oneLetter);
+          console.log(`After replace at index ${i}:`, updatedUnknowWord);
         }
       }
-      console.log("unknowWord OK", unknowWord);
-      return { word: this.word, unknowWord: unknowWord, guess: true };
+
+      console.log("unknowWord OK", updatedUnknowWord);
+      return { word: this.word, unknowWord: updatedUnknowWord, guess: true };
     }
+
+    this.numberOfTries -= 1;
     console.log("unknowWord NOK", unknowWord);
     return { word: this.word, unknowWord: unknowWord, guess: false };
   }
@@ -61,9 +69,9 @@ class Game {
   }
 
   reset() {
-    this.numberOfTry = 5;
+    this.numberOfTries = 5;
     this.chooseWord();
-    return this.numberOfTry;
+    return this.numberOfTries;
   }
 }
 
