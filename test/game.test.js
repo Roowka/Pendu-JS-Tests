@@ -91,4 +91,9 @@ describe("Game Tests", () => {
 
     expect(game.numberOfTries).toBe(5);
   });
+
+  test("should return the number of tries left", () => {
+    game.numberOfTries = 5;
+    expect(game.getNumberOfTries()).toBe(5);
+  });
 });
