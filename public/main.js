@@ -1,9 +1,20 @@
 const malusScore = 50;
 
 // LOCAL STORAGE
-let numberOfTries = localStorage.getItem("numberOfTries") || 5;
 let date = localStorage.getItem("date") || new Date().toISOString();
 let score = localStorage.getItem("score") || 1000;
+
+let numberOfTries;
+
+fetch("/api/tries")
+  .then((response) => response.json())
+  .then((data) => {
+    console.log("data", data);
+    numberOfTries = data.tries;
+    console.log("numberOfTries", numberOfTries);
+    document.getElementById("nbLeftTries").innerHTML =
+      "Nombre de tentatives restantes : " + numberOfTries;
+  });
 
 // Vérifie si le délai d'une journée est passé
 if (new Date(date).getTime() + 24 * 60 * 60 * 1000 < new Date().getTime()) {
@@ -12,10 +23,6 @@ if (new Date(date).getTime() + 24 * 60 * 60 * 1000 < new Date().getTime()) {
   localStorage.setItem("numberOfTries", numberOfTries);
   localStorage.setItem("date", new Date().toISOString());
 }
-
-// Mise à jour de l'affichage du nombre de tentatives restantes
-document.getElementById("nbLeftTries").innerHTML =
-  "Nombre de tentatives restantes : " + numberOfTries;
 
 let word;
 
@@ -112,6 +119,7 @@ function submitGuess(event) {
     .then((response) => response.json())
     .then((data) => {
       unknowWord = data.guess.unknowWord;
+      numberOfTries = data.guess.tries;
       changeUI(data);
     })
     .catch((error) => {
@@ -138,14 +146,11 @@ function changeUI(data) {
   }
 }
 
-// Mise à jour des tentatives
 function updateTries() {
-  numberOfTries--;
-  localStorage.setItem("numberOfTries", numberOfTries);
   document.getElementById("nbLeftTries").innerHTML =
     "Nombre de tentatives restantes : " + numberOfTries;
   if (numberOfTries <= 0) {
-    clearInterval(cooldownInterval); // Arrête l'intervalle
+    clearInterval(cooldownInterval);
     setDefeatUI();
     localStorage.setItem("win", false);
   }

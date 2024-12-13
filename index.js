@@ -51,6 +51,7 @@ app.get("/api/scores", (request, response) => {
   try {
     let scores = Sqlite.getPlayers()
       .then((players) => {
+        console.log("players", players);
         response.json(players);
       })
       .catch((err) => {
@@ -74,6 +75,16 @@ app.post("/api/scores", (request, response) => {
     response
       .status(201)
       .json({ success: true, player: { username, score, date } });
+  } catch (error) {
+    console.error(error.message);
+    response.status(500).send("An error occurred: " + error.message);
+  }
+});
+
+app.get("/api/tries", (request, response) => {
+  try {
+    let tries = game.getNumberOfTries();
+    response.json({ tries: tries });
   } catch (error) {
     console.error(error.message);
     response.status(500).send("An error occurred: " + error.message);
