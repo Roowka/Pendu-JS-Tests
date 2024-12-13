@@ -2,20 +2,24 @@ const malusScore = 50;
 
 // LOCAL STORAGE
 let numberOfTries = localStorage.getItem("numberOfTries") || 5;
-let date = localStorage.getItem("date") || new Date().toISOString;
+let date = localStorage.getItem("date") || new Date().toISOString();
 let score = localStorage.getItem("score") || 1000;
 
+// Vérifie si le délai d'une journée est passé
 if (new Date(date).getTime() + 24 * 60 * 60 * 1000 < new Date().getTime()) {
+  console.log("test start");
   numberOfTries = 5;
   localStorage.setItem("numberOfTries", numberOfTries);
   localStorage.setItem("date", new Date().toISOString());
 }
 
+// Mise à jour de l'affichage du nombre de tentatives restantes
 document.getElementById("nbLeftTries").innerHTML =
   "Nombre de tentatives restantes : " + numberOfTries;
 
 let word;
 
+// UI si le joueur a déjà joué
 if (localStorage.getItem("win") === "true") {
   setAlreadyPlayedUI(true);
 } else if (localStorage.getItem("win") === "false") {
@@ -42,7 +46,7 @@ async function getScores() {
 
 getScores();
 
-// EVENTS
+// Événements
 document.getElementById("submitGuess").addEventListener("click", submitGuess);
 let unknowWord = "";
 fetch("/api/word")
@@ -60,21 +64,37 @@ document
   .getElementById("submitUsername")
   .addEventListener("click", submitUsername);
 
-document.getElementById("cooldown").innerHTML =
-  "Il te reste : " + score + " secondes";
-const cooldownInterval = setInterval(() => {
-  score--;
+// Variable globale pour l'intervalle
+let cooldownInterval;
+
+// Initialisation du compte à rebours
+function startCooldown() {
   document.getElementById("cooldown").innerHTML =
     "Il te reste : " + score + " secondes";
-  localStorage.setItem("score", score);
-  if (score <= 0) {
-    clearInterval(cooldownInterval);
-    setDefeatUI();
-    document.getElementById("gameDescription").innerHTML = "Trop tard !";
-    localStorage.setItem("win", false);
-  }
-}, 1000);
 
+  cooldownInterval = setInterval(() => {
+    score--;
+    document.getElementById("cooldown").innerHTML =
+      "Il te reste : " + score + " secondes";
+    localStorage.setItem("score", score);
+    if (score <= 0) {
+      clearInterval(cooldownInterval); // Arrête l'intervalle
+      setDefeatUI();
+      document.getElementById("gameDescription").innerHTML = "Trop tard !";
+      localStorage.setItem("win", false);
+    }
+  }, 1000);
+}
+
+if (localStorage.getItem("win") === "true") {
+  setAlreadyPlayedUI(true);
+} else if (localStorage.getItem("win") === "false") {
+  setAlreadyPlayedUI(false);
+} else {
+  startCooldown();
+}
+
+// Fonction pour gérer les devinettes
 function submitGuess(event) {
   if (numberOfTries <= 0) {
     return;
@@ -99,6 +119,7 @@ function submitGuess(event) {
     });
 }
 
+// Gestion de l'interface utilisateur en fonction des réponses
 function changeUI(data) {
   if (!data.guess.guess) {
     updateTries();
@@ -111,24 +132,26 @@ function changeUI(data) {
   }
 
   if (data.guess.unknowWord === data.guess.word) {
-    clearInterval(cooldownInterval);
+    clearInterval(cooldownInterval); // Arrête l'intervalle
     setVictoryUI();
     localStorage.setItem("win", true);
   }
 }
 
+// Mise à jour des tentatives
 function updateTries() {
   numberOfTries--;
   localStorage.setItem("numberOfTries", numberOfTries);
   document.getElementById("nbLeftTries").innerHTML =
     "Nombre de tentatives restantes : " + numberOfTries;
   if (numberOfTries <= 0) {
-    clearInterval(cooldownInterval);
+    clearInterval(cooldownInterval); // Arrête l'intervalle
     setDefeatUI();
     localStorage.setItem("win", false);
   }
 }
 
+// Sauvegarder le nom d'utilisateur et son score
 async function submitUsername(event) {
   event.preventDefault();
   let username = document.getElementById("usernameInput").value;
@@ -146,6 +169,7 @@ async function submitUsername(event) {
   getScores();
 }
 
+// Écran de victoire
 function setVictoryUI() {
   document.getElementById("nbLeftTries").innerHTML = "Et c'est gagné 🥳";
   document.getElementById("nbLeftTries").classList.add("text-green-500");
@@ -159,6 +183,7 @@ function setVictoryUI() {
   document.getElementById("usernameModal").classList.remove("hidden");
 }
 
+// Écran de défaite
 function setDefeatUI() {
   document.getElementById("cooldown").innerHTML = "Perdu nullos 🫵😂";
   document.getElementById("nbLeftTries").classList.add("hidden");
@@ -168,6 +193,7 @@ function setDefeatUI() {
   document.getElementById("userWord").innerHTML = "Le mot était : " + word;
 }
 
+// UI si déjà joué
 function setAlreadyPlayedUI(win) {
   if (win) {
     document.getElementById("commeBackTomorrow").innerHTML = "Reviens demain !";
