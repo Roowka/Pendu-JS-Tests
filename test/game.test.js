@@ -39,9 +39,6 @@ describe("Game Tests", () => {
   });
 
   test("should correctly guess a letter in the word", () => {
-    game.word = "damien";
-    game.unknowWord = "######";
-
     const result = game.guess("a", game.unknowWord);
 
     expect(result).toEqual({
@@ -82,21 +79,18 @@ describe("Game Tests", () => {
   });
 
   test("should decrement tries on incorrect guess", () => {
-    game.numberOfTry = 5;
     game.guess("z", game.unknowWord);
 
     expect(game.numberOfTries).toBe(4);
   });
 
   test("should not decrement tries on correct guess", () => {
-    game.numberOfTries = 5;
     game.guess("a", game.unknowWord);
 
     expect(game.numberOfTries).toBe(5);
   });
 
   test("should return the number of tries left", () => {
-    game.numberOfTries = 5;
     expect(game.getNumberOfTries()).toBe(5);
   });
 });
