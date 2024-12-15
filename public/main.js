@@ -9,16 +9,13 @@ let numberOfTries;
 fetch("/api/tries")
   .then((response) => response.json())
   .then((data) => {
-    console.log("data", data);
     numberOfTries = data.tries;
-    console.log("numberOfTries", numberOfTries);
     document.getElementById("nbLeftTries").innerHTML =
       "Nombre de tentatives restantes : " + numberOfTries;
   });
 
 // Vérifie si le délai d'une journée est passé
 if (new Date(date).getTime() + 24 * 60 * 60 * 1000 < new Date().getTime()) {
-  console.log("test start");
   numberOfTries = 5;
   localStorage.setItem("numberOfTries", numberOfTries);
   localStorage.setItem("date", new Date().toISOString());
@@ -33,12 +30,11 @@ if (localStorage.getItem("win") === "true") {
   setAlreadyPlayedUI(false);
 }
 
-// SCORES
+// Scores
 async function getScores() {
   fetch("/api/scores")
     .then((response) => response.json())
     .then((data) => {
-      console.log("scores from api", data);
       document.getElementById("scoresList").innerHTML = "";
       for (let i = 0; i < data.length; i++) {
         let player = data[i];
@@ -59,7 +55,6 @@ let unknowWord = "";
 fetch("/api/word")
   .then((response) => response.json())
   .then((data) => {
-    console.log("data", data);
     unknowWord = data.word;
     word = data.word;
     unknowWord = unknowWord.replace(/./g, "#");
@@ -74,7 +69,6 @@ document
 // Variable globale pour l'intervalle
 let cooldownInterval;
 
-// Initialisation du compte à rebours
 function startCooldown() {
   document.getElementById("cooldown").innerHTML =
     "Il te reste : " + score + " secondes";
@@ -85,7 +79,7 @@ function startCooldown() {
       "Il te reste : " + score + " secondes";
     localStorage.setItem("score", score);
     if (score <= 0) {
-      clearInterval(cooldownInterval); // Arrête l'intervalle
+      clearInterval(cooldownInterval);
       setDefeatUI();
       document.getElementById("gameDescription").innerHTML = "Trop tard !";
       localStorage.setItem("win", false);
@@ -101,7 +95,7 @@ if (localStorage.getItem("win") === "true") {
   startCooldown();
 }
 
-// Fonction pour gérer les devinettes
+// Fonction pour gérer les guess
 function submitGuess(event) {
   if (numberOfTries <= 0) {
     return;
@@ -140,12 +134,13 @@ function changeUI(data) {
   }
 
   if (data.guess.unknowWord === data.guess.word) {
-    clearInterval(cooldownInterval); // Arrête l'intervalle
+    clearInterval(cooldownInterval);
     setVictoryUI();
     localStorage.setItem("win", true);
   }
 }
 
+// MAJ UI en fonction des essais
 function updateTries() {
   document.getElementById("nbLeftTries").innerHTML =
     "Nombre de tentatives restantes : " + numberOfTries;
@@ -156,7 +151,7 @@ function updateTries() {
   }
 }
 
-// Sauvegarder le nom d'utilisateur et son score
+// Save le nom d'utilisateur et son score
 async function submitUsername(event) {
   event.preventDefault();
   let username = document.getElementById("usernameInput").value;
@@ -180,7 +175,6 @@ function setVictoryUI() {
   document.getElementById("nbLeftTries").classList.add("text-green-500");
   document.getElementById("cooldown").classList.remove("text-red-500");
 
-  // HIDDEN
   document.getElementById("gameDescription").classList.add("hidden");
   document.getElementById("letterInput").classList.add("hidden");
   document.getElementById("submitGuess").classList.add("hidden");

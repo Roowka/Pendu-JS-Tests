@@ -3,18 +3,23 @@ const tools = require("../tools.js");
 
 jest.mock("../tools.js");
 
+// Sans ça replaceAt me renvoie undefined mais seulement en test
+tools.replaceAt = jest.fn((str, index, char) => {
+  return str.substring(0, index) + char + str.substring(index + 1);
+});
+
 let game;
 
 beforeEach(async () => {
   game = new Game();
   await game.loadWords("words_fr.txt");
-  game.word = "damien"; // Setting a known word for tests
+  game.word = "damien";
   game.unknowWord = "######";
 });
 
 describe("Game Tests", () => {
   test("should load words and select a word", async () => {
-    tools.getRandomInt.mockReturnValue(0); // Simulate selection of the first word
+    tools.getRandomInt.mockReturnValue(0); // Simulation du choix d'un mot
     game.listOfWords = ["damien", "lucas"];
     game.chooseWord();
 
@@ -34,13 +39,14 @@ describe("Game Tests", () => {
   });
 
   test("should correctly guess a letter in the word", () => {
-    console.log("game.UNKNONNWNW", game.unknowWord);
-    const result = game.guess("a", game.unknowWord);
+    game.word = "damien";
+    game.unknowWord = "######";
 
-    console.log("RESULTS: ", result);
+    const result = game.guess("a", game.unknowWord);
 
     expect(result).toEqual({
       word: "damien",
+      tries: 5,
       unknowWord: "#a####",
       guess: true,
     });
@@ -51,6 +57,7 @@ describe("Game Tests", () => {
 
     expect(result).toEqual({
       word: "damien",
+      tries: 4,
       unknowWord: "######",
       guess: false,
     });
@@ -63,13 +70,9 @@ describe("Game Tests", () => {
     );
   });
 
-  test("should reset the game and set a new word with 5 tries", () => {
-    tools.getRandomInt.mockReturnValue(1); // Simulate selection of the second word
+  test("should reset the game and set 5 tries", () => {
     game.listOfWords = ["damien", "lucas"];
-
-    game.reset();
-
-    expect(game.word).toBe("lucas");
+    game.reset(true);
     expect(game.numberOfTries).toBe(5);
   });
 

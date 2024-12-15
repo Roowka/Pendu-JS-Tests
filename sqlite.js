@@ -58,10 +58,9 @@ function getPlayers() {
         return reject(err);
       }
 
-      if (rows.length === 0) {
+      if (!rows || rows.length === 0) {
         console.log("No players found for the given date.");
-      } else {
-        console.log("Players fetched successfully:", rows);
+        return resolve([]);
       }
 
       resolve(rows);

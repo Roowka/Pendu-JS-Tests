@@ -27,7 +27,7 @@ class Game {
   }
 
   chooseWord(reset = false) {
-    const today = new Date().toISOString().split("T")[0]; // Date au format YYYY-MM-DD
+    const today = new Date().toISOString().split("T")[0];
 
     if (this.listOfWords.length > 0) {
       if (this.currentWordDate !== today || reset) {
@@ -53,16 +53,13 @@ class Game {
 
     if (this.word.includes(oneLetter)) {
       let updatedUnknowWord = unknowWord;
-      console.log("updatedUnknowWorddddd", updatedUnknowWord);
 
       for (let i = 0; i < this.word.length; i++) {
         if (this.word[i] === oneLetter) {
           updatedUnknowWord = tools.replaceAt(updatedUnknowWord, i, oneLetter);
-          console.log(`After replace at index ${i}:`, updatedUnknowWord);
         }
       }
 
-      console.log("unknowWord OK", updatedUnknowWord);
       return {
         word: this.word,
         unknowWord: updatedUnknowWord,
@@ -72,7 +69,6 @@ class Game {
     }
 
     this.numberOfTries -= 1;
-    console.log("unknowWord NOK", unknowWord);
     return {
       word: this.word,
       unknowWord: unknowWord,

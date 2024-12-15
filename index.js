@@ -29,7 +29,6 @@ app.get("/", (request, response) => {
 app.post("/api/guess", (request, response) => {
   try {
     let guess = game.guess(request.body.word, request.body.unknowWord);
-    console.log("Guess :" + guess);
     response.json({ guess: guess, unknowWord: request.body.unknowWord });
   } catch (error) {
     console.error(error.message);
@@ -51,7 +50,6 @@ app.get("/api/scores", (request, response) => {
   try {
     let scores = Sqlite.getPlayers()
       .then((players) => {
-        console.log("players", players);
         response.json(players);
       })
       .catch((err) => {
@@ -65,7 +63,6 @@ app.get("/api/scores", (request, response) => {
 
 app.post("/api/scores", (request, response) => {
   try {
-    console.log(request.body);
     const username = request.body.username;
     const score = request.body.score;
     const date = new Date().toISOString();
