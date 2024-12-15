@@ -29,7 +29,6 @@ app.get("/", (request, response) => {
 app.post("/api/guess", (request, response) => {
   try {
     let guess = game.guess(request.body.word, request.body.unknowWord);
-    console.log("Guess :" + guess);
     response.json({ guess: guess, unknowWord: request.body.unknowWord });
   } catch (error) {
     console.error(error.message);
@@ -64,7 +63,6 @@ app.get("/api/scores", (request, response) => {
 
 app.post("/api/scores", (request, response) => {
   try {
-    console.log(request.body);
     const username = request.body.username;
     const score = request.body.score;
     const date = new Date().toISOString();
@@ -74,6 +72,16 @@ app.post("/api/scores", (request, response) => {
     response
       .status(201)
       .json({ success: true, player: { username, score, date } });
+  } catch (error) {
+    console.error(error.message);
+    response.status(500).send("An error occurred: " + error.message);
+  }
+});
+
+app.get("/api/tries", (request, response) => {
+  try {
+    let tries = game.getNumberOfTries();
+    response.json({ tries: tries });
   } catch (error) {
     console.error(error.message);
     response.status(500).send("An error occurred: " + error.message);

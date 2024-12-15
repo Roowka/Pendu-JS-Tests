@@ -1,33 +1,40 @@
 const malusScore = 50;
 
 // LOCAL STORAGE
-let numberOfTries = localStorage.getItem("numberOfTries") || 5;
-let date = localStorage.getItem("date") || new Date().toISOString;
+let date = localStorage.getItem("date") || new Date().toISOString();
 let score = localStorage.getItem("score") || 1000;
 
+let numberOfTries;
+
+fetch("/api/tries")
+  .then((response) => response.json())
+  .then((data) => {
+    numberOfTries = data.tries;
+    document.getElementById("nbLeftTries").innerHTML =
+      "Nombre de tentatives restantes : " + numberOfTries;
+  });
+
+// Vérifie si le délai d'une journée est passé
 if (new Date(date).getTime() + 24 * 60 * 60 * 1000 < new Date().getTime()) {
   numberOfTries = 5;
   localStorage.setItem("numberOfTries", numberOfTries);
   localStorage.setItem("date", new Date().toISOString());
 }
 
-document.getElementById("nbLeftTries").innerHTML =
-  "Nombre de tentatives restantes : " + numberOfTries;
-
 let word;
 
+// UI si le joueur a déjà joué
 if (localStorage.getItem("win") === "true") {
   setAlreadyPlayedUI(true);
 } else if (localStorage.getItem("win") === "false") {
   setAlreadyPlayedUI(false);
 }
 
-// SCORES
+// Scores
 async function getScores() {
   fetch("/api/scores")
     .then((response) => response.json())
     .then((data) => {
-      console.log("scores from api", data);
       document.getElementById("scoresList").innerHTML = "";
       for (let i = 0; i < data.length; i++) {
         let player = data[i];
@@ -42,13 +49,12 @@ async function getScores() {
 
 getScores();
 
-// EVENTS
+// Événements
 document.getElementById("submitGuess").addEventListener("click", submitGuess);
 let unknowWord = "";
 fetch("/api/word")
   .then((response) => response.json())
   .then((data) => {
-    console.log("data", data);
     unknowWord = data.word;
     word = data.word;
     unknowWord = unknowWord.replace(/./g, "#");
@@ -60,21 +66,36 @@ document
   .getElementById("submitUsername")
   .addEventListener("click", submitUsername);
 
-document.getElementById("cooldown").innerHTML =
-  "Il te reste : " + score + " secondes";
-const cooldownInterval = setInterval(() => {
-  score--;
+// Variable globale pour l'intervalle
+let cooldownInterval;
+
+function startCooldown() {
   document.getElementById("cooldown").innerHTML =
     "Il te reste : " + score + " secondes";
-  localStorage.setItem("score", score);
-  if (score <= 0) {
-    clearInterval(cooldownInterval);
-    setDefeatUI();
-    document.getElementById("gameDescription").innerHTML = "Trop tard !";
-    localStorage.setItem("win", false);
-  }
-}, 1000);
 
+  cooldownInterval = setInterval(() => {
+    score--;
+    document.getElementById("cooldown").innerHTML =
+      "Il te reste : " + score + " secondes";
+    localStorage.setItem("score", score);
+    if (score <= 0) {
+      clearInterval(cooldownInterval);
+      setDefeatUI();
+      document.getElementById("gameDescription").innerHTML = "Trop tard !";
+      localStorage.setItem("win", false);
+    }
+  }, 1000);
+}
+
+if (localStorage.getItem("win") === "true") {
+  setAlreadyPlayedUI(true);
+} else if (localStorage.getItem("win") === "false") {
+  setAlreadyPlayedUI(false);
+} else {
+  startCooldown();
+}
+
+// Fonction pour gérer les guess
 function submitGuess(event) {
   if (numberOfTries <= 0) {
     return;
@@ -92,6 +113,7 @@ function submitGuess(event) {
     .then((response) => response.json())
     .then((data) => {
       unknowWord = data.guess.unknowWord;
+      numberOfTries = data.guess.tries;
       changeUI(data);
     })
     .catch((error) => {
@@ -99,6 +121,7 @@ function submitGuess(event) {
     });
 }
 
+// Gestion de l'interface utilisateur en fonction des réponses
 function changeUI(data) {
   if (!data.guess.guess) {
     updateTries();
@@ -117,9 +140,8 @@ function changeUI(data) {
   }
 }
 
+// MAJ UI en fonction des essais
 function updateTries() {
-  numberOfTries--;
-  localStorage.setItem("numberOfTries", numberOfTries);
   document.getElementById("nbLeftTries").innerHTML =
     "Nombre de tentatives restantes : " + numberOfTries;
   if (numberOfTries <= 0) {
@@ -129,6 +151,7 @@ function updateTries() {
   }
 }
 
+// Save le nom d'utilisateur et son score
 async function submitUsername(event) {
   event.preventDefault();
   let username = document.getElementById("usernameInput").value;
@@ -146,12 +169,12 @@ async function submitUsername(event) {
   getScores();
 }
 
+// Écran de victoire
 function setVictoryUI() {
   document.getElementById("nbLeftTries").innerHTML = "Et c'est gagné 🥳";
   document.getElementById("nbLeftTries").classList.add("text-green-500");
   document.getElementById("cooldown").classList.remove("text-red-500");
 
-  // HIDDEN
   document.getElementById("gameDescription").classList.add("hidden");
   document.getElementById("letterInput").classList.add("hidden");
   document.getElementById("submitGuess").classList.add("hidden");
@@ -159,6 +182,7 @@ function setVictoryUI() {
   document.getElementById("usernameModal").classList.remove("hidden");
 }
 
+// Écran de défaite
 function setDefeatUI() {
   document.getElementById("cooldown").innerHTML = "Perdu nullos 🫵😂";
   document.getElementById("nbLeftTries").classList.add("hidden");
@@ -168,6 +192,7 @@ function setDefeatUI() {
   document.getElementById("userWord").innerHTML = "Le mot était : " + word;
 }
 
+// UI si déjà joué
 function setAlreadyPlayedUI(win) {
   if (win) {
     document.getElementById("commeBackTomorrow").innerHTML = "Reviens demain !";

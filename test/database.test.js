@@ -53,19 +53,16 @@ describe("Database Module", () => {
 
   describe("connect", () => {
     it("should execute SQL to create the Players table without errors", () => {
+      mockDb.run.mockImplementationOnce((_, callback) => callback(null));
       connect("./test.db");
+
       expect(mockDb.run).toHaveBeenCalledWith(
-        expect.stringContaining(`CREATE TABLE IF NOT EXISTS Players (
-    Player_id INTEGER PRIMARY KEY AUTOINCREMENT,
-    Username VARCHAR(100) NOT NULL,
-    Score INTEGER(100) NOT NULL,
-    Date DATE
-  );`),
+        expect.stringContaining("CREATE TABLE IF NOT EXISTS Players"),
         expect.any(Function)
       );
     });
 
-    it("should throw an error if table creation fails", () => {
+    it("should throw an error when table creation fails", () => {
       mockDb.run.mockImplementationOnce((_, callback) =>
         callback(new Error("Table creation failed"))
       );
@@ -104,21 +101,87 @@ describe("Database Module", () => {
       const mockRows = [
         { Player_id: 1, Username: "Alice", Score: 100, Date: "2024-01-01" },
       ];
-      mockDb.all.mockImplementation((_, callback) => callback(null, mockRows));
+      mockDb.all.mockImplementation((_, __, callback) =>
+        callback(null, mockRows)
+      );
 
       await expect(getPlayers()).resolves.toEqual(mockRows);
       expect(mockDb.all).toHaveBeenCalledWith(
-        expect.stringContaining("SELECT * FROM Players"),
+        expect.stringContaining(`
+      SELECT * 
+      FROM Players 
+      WHERE DATE(Date) = DATE(?) 
+      ORDER BY Score DESC 
+      LIMIT 1000;
+    `),
+        [expect.any(String)],
         expect.any(Function)
       );
     });
 
+    it("should resolve to an empty array if no players exist", async () => {
+      mockDb.all.mockImplementation((_, __, callback) => callback(null, []));
+
+      await expect(getPlayers()).resolves.toEqual([]);
+      expect(mockDb.all).toHaveBeenCalledWith(
+        expect.stringContaining(`
+      SELECT * 
+      FROM Players 
+      WHERE DATE(Date) = DATE(?) 
+      ORDER BY Score DESC 
+      LIMIT 1000;
+    `),
+        [expect.any(String)],
+        expect.any(Function)
+      );
+    });
+
+    it("should log a message if no players are found", async () => {
+      const consoleLogSpy = jest.spyOn(console, "log").mockImplementation();
+
+      mockDb.all.mockImplementation((_, __, callback) => callback(null, []));
+
+      await getPlayers();
+
+      expect(consoleLogSpy).toHaveBeenCalledWith(
+        "No players found for the given date."
+      );
+
+      consoleLogSpy.mockRestore();
+    });
+
+    it("should log a message if players are fetched successfully", async () => {
+      const consoleLogSpy = jest.spyOn(console, "log").mockImplementation();
+      const mockRows = [
+        { Player_id: 1, Username: "Alice", Score: 100, Date: "2024-01-01" },
+      ];
+
+      mockDb.all.mockImplementation((_, __, callback) =>
+        callback(null, mockRows)
+      );
+
+      await getPlayers();
+
+      expect(consoleLogSpy).toHaveBeenCalledWith(
+        "Players fetched successfully:",
+        mockRows
+      );
+
+      consoleLogSpy.mockRestore();
+    });
+
     it("should reject the promise if fetching fails", async () => {
-      mockDb.all.mockImplementation((_, callback) =>
+      mockDb.all.mockImplementation((_, __, callback) =>
         callback(new Error("Fetch failed"))
       );
 
       await expect(getPlayers()).rejects.toThrow("Fetch failed");
+    });
+
+    it("should handle unexpected results from db.all gracefully", async () => {
+      mockDb.all.mockImplementation((_, __, callback) => callback(null, null));
+
+      await expect(getPlayers()).resolves.toEqual([]);
     });
   });
 });

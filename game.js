@@ -6,6 +6,8 @@ class Game {
   constructor() {
     this.listOfWords = [];
     this.scores = [];
+    this.numberOfTries = 5;
+    this.currentWordDate = null;
   }
 
   loadWords(filename) {
@@ -24,9 +26,15 @@ class Game {
     });
   }
 
-  chooseWord() {
+  chooseWord(reset = false) {
+    const today = new Date().toISOString().split("T")[0];
+
     if (this.listOfWords.length > 0) {
-      this.word = this.listOfWords[tools.getRandomInt(this.listOfWords.length)];
+      if (this.currentWordDate !== today || reset) {
+        this.word =
+          this.listOfWords[tools.getRandomInt(this.listOfWords.length)];
+        this.currentWordDate = today;
+      }
     } else {
       throw new Error("No words available to choose from.");
     }
@@ -44,16 +52,33 @@ class Game {
     }
 
     if (this.word.includes(oneLetter)) {
+      let updatedUnknowWord = unknowWord;
+
       for (let i = 0; i < this.word.length; i++) {
         if (this.word[i] === oneLetter) {
-          unknowWord = tools.replaceAt(unknowWord, i, oneLetter);
+          updatedUnknowWord = tools.replaceAt(updatedUnknowWord, i, oneLetter);
         }
       }
-      console.log("unknowWord OK", unknowWord);
-      return { word: this.word, unknowWord: unknowWord, guess: true };
+
+      return {
+        word: this.word,
+        unknowWord: updatedUnknowWord,
+        guess: true,
+        tries: this.numberOfTries,
+      };
     }
-    console.log("unknowWord NOK", unknowWord);
-    return { word: this.word, unknowWord: unknowWord, guess: false };
+
+    this.numberOfTries -= 1;
+    return {
+      word: this.word,
+      unknowWord: unknowWord,
+      guess: false,
+      tries: this.numberOfTries,
+    };
+  }
+
+  getNumberOfTries() {
+    return this.numberOfTries;
   }
 
   print() {
@@ -61,9 +86,9 @@ class Game {
   }
 
   reset() {
-    this.numberOfTry = 5;
+    this.numberOfTries = 5;
     this.chooseWord();
-    return this.numberOfTry;
+    return this.numberOfTries;
   }
 }
 

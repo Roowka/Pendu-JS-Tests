@@ -42,12 +42,28 @@ function insertPlayer(username, score, date) {
 
 function getPlayers() {
   return new Promise((resolve, reject) => {
-    const sql_select = `SELECT * FROM Players ORDER BY Score DESC;`;
-    db.all(sql_select, (err, rows) => {
+    const today = new Date().toISOString().split("T")[0];
+
+    const sql_select = `
+      SELECT * 
+      FROM Players 
+      WHERE DATE(Date) = DATE(?) 
+      ORDER BY Score DESC 
+      LIMIT 1000;
+    `;
+
+    db.all(sql_select, [today], (err, rows) => {
       if (err) {
         console.error("Failed to fetch players:", err.message);
         return reject(err);
       }
+
+      if (!rows || rows.length === 0) {
+        console.log("No players found for the given date.");
+        return resolve([]);
+      }
+
+      console.log("Players fetched successfully:", rows);
       resolve(rows);
     });
   });
