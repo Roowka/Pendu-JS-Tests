@@ -18,7 +18,6 @@ class Game {
           this.listOfWords.push(row.word.toLowerCase());
         })
         .on("end", () => {
-          console.log("CSV file successfully processed");
           this.chooseWord();
           resolve();
         })
