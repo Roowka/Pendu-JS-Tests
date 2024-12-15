@@ -63,6 +63,7 @@ function getPlayers() {
         return resolve([]);
       }
 
+      console.log("Players fetched successfully:", rows);
       resolve(rows);
     });
   });
