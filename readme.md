@@ -57,3 +57,7 @@ npm run test:all
 - **`index.js`**: Main server file that sets up the Express app and routes.
 - **`public/`**: Static files such as HTML, CSS, and client-side JavaScript.
 - **`views/`**: EJS templates used to render the game interface.
+
+<p align="center">
+  <img src="https://www.datocms-assets.com/48401/1627664328-javascript-everywhere.jpg?fit=max&w=900">
+</p>
