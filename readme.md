@@ -54,6 +54,6 @@ npm run test:all
 - **`views/`**: EJS templates used to render the game interface.
 
 <p align="center">
-![Dave](https://github.com/user-attachments/assets/7c47b371-7a94-40c7-9abe-c79bb7361e04)
+  <img src="https://fbi.cults3d.com/uploaders/32338244/illustration-file/f23d00d1-2861-40af-8e83-1e8f5eda7403/WhatsApp-Image-2024-08-27-at-6.36.25-PM.jpeg" />
 </p>
 
