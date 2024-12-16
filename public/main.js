@@ -19,6 +19,7 @@ if (new Date(date).getTime() + 24 * 60 * 60 * 1000 < new Date().getTime()) {
   numberOfTries = 5;
   localStorage.setItem("numberOfTries", numberOfTries);
   localStorage.setItem("date", new Date().toISOString());
+  localStorage.setItem("win") = null;
 }
 
 let word;
