@@ -4,7 +4,7 @@ const {
   insertPlayer,
   getPlayers,
   connect,
-} = require("../sqlite");
+} = require("../../sqlite");
 
 jest.mock("sqlite3", () => {
   const runMock = jest.fn();
