@@ -36,8 +36,6 @@ test("try a letter", async ({ page }) => {
     }
   };
 
-  console.log(await nbTriesLocator.innerText());
-
   const result = await Promise.race([
     wrapAssertion(() => expect(userWordLocator).toContainText("a")),
     wrapAssertion(() =>
