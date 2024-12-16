@@ -1,4 +1,9 @@
 [![Jest & Playwright](https://github.com/Roowka/Pendu-JS-Tests/actions/workflows/node.js.yml/badge.svg)](https://github.com/Roowka/Pendu-JS-Tests/actions/workflows/node.js.yml)
+![Branches](./badges/coverage-branches.svg)
+![Functions](./badges/coverage-functions.svg)
+![Lines](./badges/coverage-lines.svg)
+![Statements](./badges/coverage-statements.svg)
+![Coverage total](./badges/coverage-total.svg)
 
 # Hangman Game
 
