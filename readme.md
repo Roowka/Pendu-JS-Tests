@@ -1,3 +1,5 @@
+[![Jest & Playwright](https://github.com/Roowka/Pendu-JS-Tests/actions/workflows/node.js.yml/badge.svg)](https://github.com/Roowka/Pendu-JS-Tests/actions/workflows/node.js.yml)
+
 # Hangman Game
 
 This is a small project to build a classic Hangman game in JavaScript.
