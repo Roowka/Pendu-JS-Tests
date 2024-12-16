@@ -1,4 +1,4 @@
-[![Jest & Playwright](https://github.com/Roowka/Pendu-JS-Tests/actions/workflows/node.js.yml/badge.svg)](https://github.com/Roowka/Pendu-JS-Tests/actions/workflows/node.js.yml)
+[![Jest & Playwright tests](https://github.com/Roowka/Pendu-JS-Tests/actions/workflows/node.js.yml/badge.svg)](https://github.com/Roowka/Pendu-JS-Tests/actions/workflows/node.js.yml)
 
 # Hangman Game
 
@@ -26,16 +26,34 @@ This will start the server, and you can play the game by visiting `http://localh
 This project uses Jest for testing. To run the tests, use the following command:
 
 ```bash
-npm test
+npm run test:jest
 ```
 
 The tests are designed to ensure that the game logic works correctly and to demonstrate best practices in test-driven development.
+
+There are also e2e tests with Playwright. To start them run the following command:
+
+```bash
+npm run test:playwright
+```
+
+To start all the tests you can run the following command:
+
+```bash
+npm run test:all
+```
 
 ## Project Structure
 
 - **`game.js`**: Contains the core game logic.
 - **`tools.js`**: Utility functions used in the game.
-- **`test/`**: Contains test files for each module (e.g., `game.test.js`, `tools.test.js`).
+- **`test/jest/`**: Contains test files for each module (e.g., `game.test.js`, `tools.test.js`).
+- - **`test/playwright/`**: Contains e2e tests.
 - **`index.js`**: Main server file that sets up the Express app and routes.
 - **`public/`**: Static files such as HTML, CSS, and client-side JavaScript.
 - **`views/`**: EJS templates used to render the game interface.
+
+<p align="center">
+![Dave](https://github.com/user-attachments/assets/7c47b371-7a94-40c7-9abe-c79bb7361e04)
+</p>
+
