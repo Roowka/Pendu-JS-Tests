@@ -48,10 +48,12 @@ npm run test:all
 - **`game.js`**: Contains the core game logic.
 - **`tools.js`**: Utility functions used in the game.
 - **`test/jest/`**: Contains test files for each module (e.g., `game.test.js`, `tools.test.js`).
-- - **`test/playwright/`**: Contains e2e tests.
+- **`test/playwright/`**: Contains e2e tests.
 - **`index.js`**: Main server file that sets up the Express app and routes.
 - **`public/`**: Static files such as HTML, CSS, and client-side JavaScript.
 - **`views/`**: EJS templates used to render the game interface.
+
+
 
 <p align="center">
   <img src="https://www.datocms-assets.com/48401/1627664328-javascript-everywhere.jpg?fit=max&w=900">
