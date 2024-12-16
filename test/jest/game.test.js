@@ -1,7 +1,7 @@
-const Game = require("../game.js");
-const tools = require("../tools.js");
+const Game = require("../../game.js");
+const tools = require("../../tools.js");
 
-jest.mock("../tools.js");
+jest.mock("../../tools.js");
 
 // Sans ça replaceAt me renvoie undefined mais seulement en test
 tools.replaceAt = jest.fn((str, index, char) => {
