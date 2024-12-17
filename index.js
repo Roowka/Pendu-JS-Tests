@@ -48,7 +48,7 @@ app.get("/api/word", (request, response) => {
 
 app.get("/api/scores", (request, response) => {
   try {
-    let scores = Sqlite.getPlayers()
+    Sqlite.getPlayers()
       .then((players) => {
         response.json(players);
       })

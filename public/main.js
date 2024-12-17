@@ -19,7 +19,7 @@ if (new Date(date).getTime() + 24 * 60 * 60 * 1000 < new Date().getTime()) {
   numberOfTries = 5;
   localStorage.setItem("numberOfTries", numberOfTries);
   localStorage.setItem("date", new Date().toISOString());
-  localStorage.setItem("win") = null;
+  localStorage.setItem("win", null);
 }
 
 let word;
@@ -159,14 +159,13 @@ async function submitUsername(event) {
   document.getElementById("cooldown").innerHTML =
     username + ", ton score est de : " + score;
   document.getElementById("usernameModal").classList.add("hidden");
-  const res = await fetch("/api/scores", {
+  await fetch("/api/scores", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
     },
     body: JSON.stringify({ username: username, score: score }),
   });
-  const data = await res.json();
   getScores();
 }
 
